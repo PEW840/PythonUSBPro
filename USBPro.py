@@ -37,7 +37,7 @@ def read(timeout):
 #------------------------------------------------------------------------------------------------------
 #Perfoms a synchronous write. Return 1 upon success, or 0 i no tag was found.
 def write(newEpc, oldEpc):
-    if rfid.write(epc_code=newEpc, epc_target=oldEpc):
+    if rfid.write(newEpc, oldEpc):
         print('Rewrited "{}" with "{}"'.format(oldEpc, newEpc))
         return 1
     else:
