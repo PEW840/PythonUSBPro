@@ -1,5 +1,6 @@
 import mercury
 rfid = mercury.Reader("tmr:///dev/ttyACM0")
+tagObj  = mercury.TagReadData
 
 #TagReadData Object - Represents a read of an RFID tag:
 #
@@ -25,17 +26,12 @@ rfid = mercury.Reader("tmr:///dev/ttyACM0")
 #e.g. print(repr(tag)) results in: EPC(b'E2000087071401930700D206')
 #------------------------------------------------------------------------------------------------------
 def TagReadDataObject():
-    obj = TagReadData()
-    return obj
-#------------------------------------------------------------------------------------------------------
-def init():
-    rfid.set_region("EU3")
+    return tagObj
 
 #------------------------------------------------------------------------------------------------------
 #antenna: 1 for internal and 2 for external antenna
 #timeout: Reading time in ms.
-def read(antenna, timeout):
-    rfid.set_read_plan([antenna], "GEN2")
+def read(timeout):
     return rfid.read(timeout)
 
 #------------------------------------------------------------------------------------------------------
@@ -48,6 +44,8 @@ def write(newEpc, oldEpc):
         print('No tag found!')
         return 0
 
+def setReadPlan(antenna=1, protocol="GEN2", epcTarget=None, bank=[], readPower=0):
+    rfid.set_read_plan([antenna], protocol, epcTarget, bank, readPower)
 #------------------------------------------------------------------------------------------------------    
 #Callback routine for enableStats, this subroutine prints read stats
 def statsReceived(stats):
@@ -58,7 +56,7 @@ def statsReceived(stats):
 
 #Provide reader stats during asynchronous tag reads
 #This function must be called before 'startReading()'
-def enableStats:
+def enableStats():
     rfid.enable_stats(statsReceived)
 
 #------------------------------------------------------------------------------------------------------
@@ -95,10 +93,10 @@ def readTagMem(bank, address, count, epcTarget):
 #Writes byte to the memory bank of a tag. Returns 1 upon success, or 0 if no tag was found.
 #Upon failure an exception is raised
 def writeTagMem(bank, address, data, epcTarget):
-    if rfid.write_tag_mem(bank, address, data, epc_target=epcTargete):
+    if rfid.write_tag_mem(bank, address, data, epc_target=epcTarget):
         print('Wrote "{}" at bank "{}" and address "{}" successfully!'.format(data, bank, address))
         return 1
-    else
+    else:
         print('No tag found!')
         return 0
 
@@ -133,7 +131,7 @@ def getSerial():
 #Controls the Region of Operation for the connected device
 #region - e.g "EU3"
 def setRegion(region):
-    return rfid.set_region(region)
+    rfid.set_region(region)
 
 #------------------------------------------------------------------------------------------------------
 #Lists supported regions for the connected device
@@ -163,7 +161,7 @@ def setHopTime(num):
 
 #------------------------------------------------------------------------------------------------------
 #Lists available antennas, e.g. [1,2]
-def getAntennas()::
+def getAntennas():
     return rfid.get_antennas()
 
 #------------------------------------------------------------------------------------------------------
@@ -322,12 +320,23 @@ def getTemperature():
     return rfid.get_temperature()
 
 #------------------------------------------------------------------------------------------------------
+#Example routine. This routine will run if this file is executed by itself
 def main():
-    init()
-    print(supportedRegions())
-    print(supportedFreq())
-    print(availableAntennas())
-    print(read(3000))
+######## Set EU3 region if supported ########
+    supRegions = supportedRegions()
+    if 'EU3' in supRegions:
+        setRegion("EU3")
+    else:
+        print("Error: EU3 is not supported")
+    
+######## Set read plan ########
+    setReadPlan() #Using default values
+    
+    #print(supportedRegions())
+    #print(getHopTable())
+    #print(getAntennas())
+    #print(read(1,3000))
+    #x = TagReadDataObject()
 
 if __name__ == "__main__":
     main()
