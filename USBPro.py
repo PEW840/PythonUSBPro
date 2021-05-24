@@ -1,7 +1,21 @@
 import mercury
-rfid = mercury.Reader("tmr:///dev/ttyACM0")
 tagObj  = mercury.TagReadData
 
+x=0
+while True:
+    if x < 32:
+        try:
+            rfid = mercury.Reader("tmr:///dev/ttyACM{}".format(x))
+        except:
+            x += 1
+            continue
+        else:
+            print("Device found at ttyACM{}".format(x))
+            break
+    else:
+        print("Error, could not connect to USB Pro device :( ")
+        print("If device was recently connected, wait 30 seconds before retry")
+        exit()
 #TagReadData Object - Represents a read of an RFID tag:
 #
 #   epc - corresponds to the Electronic Product Code
@@ -102,15 +116,15 @@ def writeTagMem(bank, address, data, epcTarget):
 
 #------------------------------------------------------------------------------------------------------
 #Returns value of GPIO pin, or None if the pin is not configured as input (see getGpioInputs)
-def gpioGet(pin):
+def gpiGet(pin):
     return rfid.gpi_get(pin)
 
 #------------------------------------------------------------------------------------------------------
 #Sets value of a GPIO pin configured as output (see getGpioOutputs)
 #pin   - GPIO pin
 #value - 0 or 1
-def gpioSet(pin, value):
-    rfid.gpio_set(pin, value)
+def gpoSet(pin, value):
+    rfid.gpo_set(pin, value)
 
 #------------------------------------------------------------------------------------------------------
 #Returns a model identifier for the connected reader hardware (e.g "M6e Nano" or "M6e Micro USBPro")
